@@ -64,9 +64,9 @@ fn window_event(model: &mut Model, event: WindowEvent) {
     match event {
         KeyPressed(key) => {
             match key {
-                Key::A => { model.mino.move_left_if_possible(&model.board) }
-                Key::S => { model.mino.move_down_if_possible(&model.board) }
-                Key::D => { model.mino.move_right_if_possible(&model.board) }
+                Key::A | Key::Left => { model.mino.move_left_if_possible(&model.board) }
+                Key::S | Key::Down => { model.mino.move_down_if_possible(&model.board) }
+                Key::D | Key::Right => { model.mino.move_right_if_possible(&model.board) }
                 Key::W => {
                     model.mino.y += 1;
                 }
