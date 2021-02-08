@@ -4,7 +4,7 @@ use nannou::rand::thread_rng;
 
 const BLOCK_SIZE: f32 = 30.0;
 const BOARD_WIDTH: usize = 10;
-const BOARD_HEIGHT: usize = 20;
+const BOARD_HEIGHT: usize = 24;
 
 const T_WHITE: Rgb8 = WHITESMOKE;
 const T_BG: Rgb8 = DARKGRAY;
@@ -31,6 +31,8 @@ struct Model {
     mino: Mino,
     board: Board,
     next_minos: Vec<Mino>,
+    deleted_lines: u32,
+    active: bool,
     fc: i32
 }
 
@@ -42,6 +44,8 @@ fn model(_app: &App) -> Model {
         mino: mino,
         board: board,
         next_minos: minos,
+        deleted_lines: 0,
+        active: true,
         fc: 0
     }
 }
@@ -79,18 +83,24 @@ fn window_event(model: &mut Model, event: WindowEvent) {
 }
 
 fn update(_app: &App, model: &mut Model, _update: Update) {
-    if model.fc % 30 == 0 {
+    if model.active && model.fc % 30 == 0 {
         if !model.mino.can_move_down(&model.board) {
-            // ミノを設置する
             model.board.put_mino(&model.mino);
-            // ラインを消す
-            model.board.delete_line();
-            // 次のミノが出現する
-            model.mino = get_next_mino(model);
+            let n_delete = model.board.delete_line();
+            model.deleted_lines += n_delete;
+            let next_mino: Mino = get_next_mino(model);
+            if can_spawn(&next_mino, &model.board) {
+                model.mino = next_mino;
+            } else {
+                model.active = false;
+                println!("you deleted {} lines", model.deleted_lines);
+            }
         }
         model.mino.move_down();
     }
-    model.fc += 1;
+    if model.active {
+        model.fc += 1;
+    }
 }
 
 fn get_next_mino(model: &mut Model) -> Mino {
@@ -102,6 +112,11 @@ fn get_next_mino(model: &mut Model) -> Mino {
             return mino
         },
     }
+}
+
+fn can_spawn(mino: &Mino, board: &Board) -> bool {
+    let blocks = mino.get_blocks();
+    return blocks.iter().all(|b| board.is_blank_at(b.x, b.y));
 }
 
 fn generate_mino_pool() -> Vec<Mino> {
@@ -144,7 +159,7 @@ impl Block {
 
     fn draw(&self, draw: &Draw) {
         let loc_x = BLOCK_SIZE * (self.x - BOARD_WIDTH as i32 / 2) as f32;
-        let loc_y = BLOCK_SIZE * (self.y - BOARD_HEIGHT as i32 / 2) as f32;
+        let loc_y = BLOCK_SIZE * (self.y - (BOARD_HEIGHT - 4) as i32 / 2) as f32;
         let block_size = BLOCK_SIZE * 0.95;
         draw.rect()
             .x_y(loc_x, loc_y)
@@ -169,7 +184,7 @@ impl Block {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 enum Shape {
     T,
     Z,
@@ -180,6 +195,7 @@ enum Shape {
     I
 }
 
+#[derive(Debug)]
 struct Mino {
     x: i32,
     y: i32,
@@ -331,7 +347,7 @@ impl Board {
     fn get_blocks(&self) -> Vec<Block> {
         let mut blocks: Vec<Block> = vec![];
         for x in (0..BOARD_WIDTH).into_iter() {
-            for y in (0..BOARD_HEIGHT).into_iter() {
+            for y in (0..(BOARD_HEIGHT - 4)).into_iter() {
                 match self.blocks[y][x] {
                     0 => {
                         blocks.push(Block::new(x as i32, y as i32, T_WHITE))
@@ -358,16 +374,19 @@ impl Board {
         self.blocks[y][x] = 1;
     }
 
-    fn delete_line(&mut self) {
+    fn delete_line(&mut self) -> u32 {
+        let mut delete_count = 0;
         for y in (0..(BOARD_HEIGHT - 1)).into_iter().rev() {
             let line = self.blocks[y];
             if line.iter().all(|&b| b == 1) {
+                delete_count += 1;
                 for yy in (y..(BOARD_HEIGHT - 2)).into_iter() {
                     self.blocks[yy] = self.blocks[yy + 1];
                 }
                 self.blocks[BOARD_HEIGHT - 1] = [0; BOARD_WIDTH];
             }
         }
+        return delete_count
     }
 
     fn draw(&self, draw: &Draw) {
