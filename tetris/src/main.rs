@@ -81,7 +81,11 @@ fn window_event(model: &mut Model, event: WindowEvent) {
 fn update(_app: &App, model: &mut Model, _update: Update) {
     if model.fc % 30 == 0 {
         if !model.mino.can_move_down(&model.board) {
+            // ミノを設置する
             model.board.put_mino(&model.mino);
+            // ラインを消す
+            model.board.delete_line();
+            // 次のミノが出現する
             model.mino = get_next_mino(model);
         }
         model.mino.move_down();
@@ -352,6 +356,18 @@ impl Board {
         let x = block.x as usize;
         let y = block.y as usize;
         self.blocks[y][x] = 1;
+    }
+
+    fn delete_line(&mut self) {
+        for y in (0..(BOARD_HEIGHT - 1)).into_iter().rev() {
+            let line = self.blocks[y];
+            if line.iter().all(|&b| b == 1) {
+                for yy in (y..(BOARD_HEIGHT - 2)).into_iter() {
+                    self.blocks[yy] = self.blocks[yy + 1];
+                }
+                self.blocks[BOARD_HEIGHT - 1] = [0; BOARD_WIDTH];
+            }
+        }
     }
 
     fn draw(&self, draw: &Draw) {
