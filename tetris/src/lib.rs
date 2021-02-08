@@ -9,6 +9,8 @@ const BOARD_HEIGHT: usize = 24;
 const T_WHITE: Rgb8 = WHITESMOKE;
 const T_BG: Rgb8 = DARKGRAY;
 
+const C_STR: Rgb8 = NAVY;
+
 const C_LOCATED: Rgb8 = SILVER;
 
 const C_TMINO: Rgb8 = ROYALBLUE;
@@ -131,7 +133,17 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
     model.board.draw(&draw);
     model.mino.draw(&draw);
+    show_counts(model.deleted_lines, &draw);
     draw.to_frame(app, &frame).unwrap();
+}
+
+fn show_counts(dc: u32, draw: &Draw) {
+    let x = 0.0;
+    let y = BLOCK_SIZE * (-1 - (BOARD_HEIGHT - 4) as i32 / 2) as f32;
+    let str = format!("You deleted {} lines.", dc);
+    draw.text(&str)
+        .x_y(x, y)
+        .color(C_STR);
 }
 
 struct Block {
