@@ -5,6 +5,7 @@ use nannou::rand::thread_rng;
 const BLOCK_SIZE: f32 = 30.0;
 const BOARD_WIDTH: usize = 10;
 const BOARD_HEIGHT: usize = 24;
+const BOARD_HEIGHT_PLAYABLE: usize = 20;
 
 const T_WHITE: Rgb8 = WHITESMOKE;
 const T_BG: Rgb8 = DARKGRAY;
@@ -31,6 +32,10 @@ pub struct Model {
 }
 
 pub fn model(_app: &App) -> Model {
+    return get_initial_model()
+}
+
+fn get_initial_model() -> Model {
     let board = Board::new();
     let mut minos = generate_mino_pool();
     let mino = minos.remove(0);
@@ -69,6 +74,15 @@ fn window_event(model: &mut Model, event: WindowEvent) {
                     model.mino.y += 1;
                 }
                 Key::R => { model.mino.rotate_if_possible(&model.board) }
+                Key::Space => {
+                    let new_mdl = get_initial_model();
+                    model.mino = new_mdl.mino;
+                    model.board = new_mdl.board;
+                    model.next_minos = new_mdl.next_minos;
+                    model.deleted_lines = new_mdl.deleted_lines;
+                    model.active = new_mdl.active;
+                    model.fc = new_mdl.fc;
+                }
                 _ => {}
             }
         }
@@ -87,7 +101,6 @@ pub fn update(_app: &App, model: &mut Model, _update: Update) {
                 model.mino = next_mino;
             } else {
                 model.active = false;
-                println!("you deleted {} lines", model.deleted_lines);
             }
         }
         model.mino.move_down();
@@ -132,14 +145,16 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
     frame.clear(T_BG);
     let draw = app.draw();
     model.board.draw(&draw);
-    model.mino.draw(&draw);
+    if model.active {
+        model.mino.draw(&draw);
+    }
     show_counts(model.deleted_lines, &draw);
     draw.to_frame(app, &frame).unwrap();
 }
 
 fn show_counts(dc: u32, draw: &Draw) {
     let x = 0.0;
-    let y = BLOCK_SIZE * (-1 - (BOARD_HEIGHT - 4) as i32 / 2) as f32;
+    let y = BLOCK_SIZE * (-1 - BOARD_HEIGHT_PLAYABLE as i32 / 2) as f32;
     let str = format!("You deleted {} lines.", dc);
     draw.text(&str)
         .x_y(x, y)
@@ -163,7 +178,7 @@ impl Block {
 
     fn draw(&self, draw: &Draw) {
         let loc_x = BLOCK_SIZE * (self.x - BOARD_WIDTH as i32 / 2) as f32;
-        let loc_y = BLOCK_SIZE * (self.y - (BOARD_HEIGHT - 4) as i32 / 2) as f32;
+        let loc_y = BLOCK_SIZE * (self.y - BOARD_HEIGHT_PLAYABLE as i32 / 2) as f32;
         let block_size = BLOCK_SIZE * 0.95;
         draw.rect()
             .x_y(loc_x, loc_y)
@@ -350,7 +365,7 @@ impl Board {
     fn get_blocks(&self) -> Vec<Block> {
         let mut blocks: Vec<Block> = vec![];
         for x in (0..BOARD_WIDTH).into_iter() {
-            for y in (0..(BOARD_HEIGHT - 4)).into_iter() {
+            for y in (0..BOARD_HEIGHT_PLAYABLE).into_iter() {
                 match self.blocks[y][x] {
                     0 => {
                         blocks.push(Block::new(x as i32, y as i32, T_WHITE))
