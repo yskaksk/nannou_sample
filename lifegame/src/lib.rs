@@ -33,22 +33,30 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
 }
 
 struct Cells {
-    cell_mat: [[i32; WIDTH]; HEIGHT]
+    r_mat: [[i32; WIDTH]; HEIGHT],
+    g_mat: [[i32; WIDTH]; HEIGHT],
+    b_mat: [[i32; WIDTH]; HEIGHT]
 }
 
 impl Cells {
     fn new() -> Self {
-        let mut mat = [[0; WIDTH]; HEIGHT];
+        let mut r_mat = [[0; WIDTH]; HEIGHT];
+        let mut g_mat = [[0; WIDTH]; HEIGHT];
+        let mut b_mat = [[0; WIDTH]; HEIGHT];
         let mut rng = rand::thread_rng();
         for x in (0..WIDTH).into_iter() {
             for y in (0..HEIGHT).into_iter() {
-                if rng.gen_range(0.0, 1.0) < 0.25 {
-                    mat[y][x] = 1;
+                if rng.gen_range(0.0, 1.0) < 0.4 {
+                    r_mat[y][x] = 1;
+                    g_mat[(y + 1) % HEIGHT][(x + 1) % WIDTH] = 1;
+                    b_mat[(y + 2) % HEIGHT][(x + 2) % WIDTH] = 1;
                 }
             }
         }
         Cells {
-            cell_mat: mat
+            r_mat: r_mat,
+            g_mat: g_mat,
+            b_mat: b_mat,
         }
     }
 
@@ -58,11 +66,16 @@ impl Cells {
                 let loc_x = CELL_SIZE * (x_ind as i32 - WIDTH as i32 / 2) as f32;
                 let loc_y = CELL_SIZE * (y_ind as i32 - HEIGHT as i32 / 2) as f32;
                 let block_size = CELL_SIZE * 0.9;
-                let color = match self.cell_mat[y_ind][x_ind] {
-                    0 => WHITE,
-                    1 => BLACK,
-                    _ => RED,
-                };
+
+                let r = self.r_mat[y_ind][x_ind];
+                let g = self.g_mat[y_ind][x_ind];
+                let b = self.b_mat[y_ind][x_ind];
+                let color = rgba(
+                    244.0 * (1 - r) as f32 / 255.0,
+                    244.0 * (1 - g) as f32 / 255.0,
+                    244.0 * (1 - b) as f32 / 255.0,
+                    1.0
+                );
                 draw.rect()
                     .x_y(loc_x, loc_y)
                     .w(block_size)
@@ -72,18 +85,18 @@ impl Cells {
         }
     }
 
-    fn next_cell_at(&self, x: usize, y: usize) -> i32 {
-        let env_sum = self.cell_mat[(y + HEIGHT - 1) % HEIGHT][(x + WIDTH - 1) % WIDTH]
-                    + self.cell_mat[(y + HEIGHT - 1) % HEIGHT][x]
-                    + self.cell_mat[(y + HEIGHT - 1) % HEIGHT][(x + 1) % WIDTH]
-                    + self.cell_mat[y][(x + WIDTH - 1) % WIDTH]
-                    + self.cell_mat[y][(x + 1) % WIDTH]
-                    + self.cell_mat[(y + 1) % HEIGHT][(x + WIDTH - 1) % WIDTH]
-                    + self.cell_mat[(y + 1) % HEIGHT][x]
-                    + self.cell_mat[(y + 1) % HEIGHT][(x  + 1) % WIDTH];
+    fn next_cell_at(x: usize, y: usize, cell_mat: &[[i32; WIDTH]; HEIGHT]) -> i32 {
+        let env_sum = cell_mat[(y + HEIGHT - 1) % HEIGHT][(x + WIDTH - 1) % WIDTH]
+                    + cell_mat[(y + HEIGHT - 1) % HEIGHT][x]
+                    + cell_mat[(y + HEIGHT - 1) % HEIGHT][(x + 1) % WIDTH]
+                    + cell_mat[y][(x + WIDTH - 1) % WIDTH]
+                    + cell_mat[y][(x + 1) % WIDTH]
+                    + cell_mat[(y + 1) % HEIGHT][(x + WIDTH - 1) % WIDTH]
+                    + cell_mat[(y + 1) % HEIGHT][x]
+                    + cell_mat[(y + 1) % HEIGHT][(x  + 1) % WIDTH];
         let next_cell = match env_sum {
             0 | 1 => 0,
-            2 => self.cell_mat[y][x],
+            2 => cell_mat[y][x],
             3 => 1,
             _other => 0
         };
@@ -91,12 +104,18 @@ impl Cells {
     }
 
     fn next_gen(&mut self) {
-        let mut mat = [[0; WIDTH]; HEIGHT];
+        let mut r_mat = [[0; WIDTH]; HEIGHT];
+        let mut g_mat = [[0; WIDTH]; HEIGHT];
+        let mut b_mat = [[0; WIDTH]; HEIGHT];
         for x_ind in (0..WIDTH).into_iter() {
             for y_ind in (0..HEIGHT).into_iter() {
-                mat[y_ind][x_ind] = self.next_cell_at(x_ind, y_ind);
+                r_mat[y_ind][x_ind] = Cells::next_cell_at(x_ind, y_ind, &self.r_mat);
+                g_mat[y_ind][x_ind] = Cells::next_cell_at(x_ind, y_ind, &self.g_mat);
+                b_mat[y_ind][x_ind] = Cells::next_cell_at(x_ind, y_ind, &self.b_mat);
             }
         }
-        self.cell_mat = mat;
+        self.r_mat = r_mat;
+        self.g_mat = g_mat;
+        self.b_mat = b_mat;
     }
 }
