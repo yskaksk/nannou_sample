@@ -5,16 +5,18 @@ use nannou::rand::Rng;
 const HEIGHT: usize = 50;
 const WIDTH: usize = 80;
 
-const CELL_SIZE: f32 = 10.0;
+const CELL_SIZE: f32 = 12.0;
 
 pub struct Model {
     cells: Cells,
+    fc: i32
 }
 
 pub fn model(_app: &App) -> Model {
     let cells = Cells::new();
     Model {
         cells: cells,
+        fc: 0
     }
 }
 
@@ -23,6 +25,7 @@ pub fn event(_app: &App, _model: &mut Model, _event: Event) {
 
 pub fn update(_app: &App, model: &mut Model, _update: Update) {
     model.cells.next_gen();
+    model.fc += 1;
 }
 
 pub fn view(app: &App, model: &Model, frame: Frame) {
@@ -65,7 +68,7 @@ impl Cells {
             for y_ind in (0..HEIGHT).into_iter() {
                 let loc_x = CELL_SIZE * (x_ind as i32 - WIDTH as i32 / 2) as f32;
                 let loc_y = CELL_SIZE * (y_ind as i32 - HEIGHT as i32 / 2) as f32;
-                let block_size = CELL_SIZE * 0.9;
+                let block_size = CELL_SIZE * 0.95;
 
                 let r = self.r_mat[y_ind][x_ind];
                 let g = self.g_mat[y_ind][x_ind];
