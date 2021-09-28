@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "hello",
+    "pen",
     "image",
     "lifegame",
     "tetris"
