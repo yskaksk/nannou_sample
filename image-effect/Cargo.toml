@@ -1,5 +1,5 @@
 [package]
-name = "image"
+name = "image-effect"
 version = "0.1.0"
 authors = ["yskaksk <yskaksk@gmail.com>"]
 edition = "2018"
