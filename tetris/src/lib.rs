@@ -28,11 +28,11 @@ pub struct Model {
     next_minos: Vec<Mino>,
     deleted_lines: u32,
     active: bool,
-    fc: i32
+    fc: i32,
 }
 
 pub fn model(_app: &App) -> Model {
-    return get_initial_model()
+    return get_initial_model();
 }
 
 fn get_initial_model() -> Model {
@@ -45,7 +45,7 @@ fn get_initial_model() -> Model {
         next_minos: minos,
         deleted_lines: 0,
         active: true,
-        fc: 0
+        fc: 0,
     }
 }
 
@@ -53,7 +53,7 @@ pub fn event(_app: &App, model: &mut Model, event: Event) {
     match event {
         Event::WindowEvent {
             id: _,
-            simple: some_we
+            simple: some_we,
         } => {
             if let Some(we) = some_we {
                 window_event(model, we);
@@ -65,27 +65,25 @@ pub fn event(_app: &App, model: &mut Model, event: Event) {
 
 fn window_event(model: &mut Model, event: WindowEvent) {
     match event {
-        KeyPressed(key) => {
-            match key {
-                Key::A | Key::Left => { model.mino.move_left_if_possible(&model.board) }
-                Key::S | Key::Down => { model.mino.move_down_if_possible(&model.board) }
-                Key::D | Key::Right => { model.mino.move_right_if_possible(&model.board) }
-                Key::W => {
-                    model.mino.y += 1;
-                }
-                Key::R => { model.mino.rotate_if_possible(&model.board) }
-                Key::Space => {
-                    let new_mdl = get_initial_model();
-                    model.mino = new_mdl.mino;
-                    model.board = new_mdl.board;
-                    model.next_minos = new_mdl.next_minos;
-                    model.deleted_lines = new_mdl.deleted_lines;
-                    model.active = new_mdl.active;
-                    model.fc = new_mdl.fc;
-                }
-                _ => {}
+        KeyPressed(key) => match key {
+            Key::A | Key::Left => model.mino.move_left_if_possible(&model.board),
+            Key::S | Key::Down => model.mino.move_down_if_possible(&model.board),
+            Key::D | Key::Right => model.mino.move_right_if_possible(&model.board),
+            Key::W => {
+                model.mino.y += 1;
             }
-        }
+            Key::R => model.mino.rotate_if_possible(&model.board),
+            Key::Space => {
+                let new_mdl = get_initial_model();
+                model.mino = new_mdl.mino;
+                model.board = new_mdl.board;
+                model.next_minos = new_mdl.next_minos;
+                model.deleted_lines = new_mdl.deleted_lines;
+                model.active = new_mdl.active;
+                model.fc = new_mdl.fc;
+            }
+            _ => {}
+        },
         _other => {}
     }
 }
@@ -116,8 +114,8 @@ fn get_next_mino(model: &mut Model) -> Mino {
         None => {
             model.next_minos = generate_mino_pool();
             let mino = model.next_minos.remove(0);
-            return mino
-        },
+            return mino;
+        }
     }
 }
 
@@ -134,11 +132,11 @@ fn generate_mino_pool() -> Vec<Mino> {
         Mino::new(5, 20, 0, Shape::L),
         Mino::new(5, 20, 0, Shape::S),
         Mino::new(5, 20, 0, Shape::Z),
-        Mino::new(5, 20, 0, Shape::O)
+        Mino::new(5, 20, 0, Shape::O),
     ];
     let mut rng = thread_rng();
     minos.shuffle(&mut rng);
-    return minos
+    return minos;
 }
 
 pub fn view(app: &App, model: &Model, frame: Frame) {
@@ -156,15 +154,13 @@ fn show_counts(dc: u32, draw: &Draw) {
     let x = 0.0;
     let y = BLOCK_SIZE * (-1 - BOARD_HEIGHT_PLAYABLE as i32 / 2) as f32;
     let str = format!("You deleted {} lines.", dc);
-    draw.text(&str)
-        .x_y(x, y)
-        .color(C_STR);
+    draw.text(&str).x_y(x, y).color(C_STR);
 }
 
 struct Block {
     x: i32,
     y: i32,
-    color: Rgb8
+    color: Rgb8,
 }
 
 impl Block {
@@ -172,7 +168,7 @@ impl Block {
         Block {
             x: x,
             y: y,
-            color: color
+            color: color,
         }
     }
 
@@ -195,11 +191,11 @@ impl Block {
             x = -y;
             y = tmp;
         }
-        return Block::new(x, y, self.color)
+        return Block::new(x, y, self.color);
     }
 
     fn shift(&self, shift_x: i32, shift_y: i32) -> Block {
-        return Block::new(self.x + shift_x, self.y + shift_y, self.color)
+        return Block::new(self.x + shift_x, self.y + shift_y, self.color);
     }
 }
 
@@ -211,7 +207,7 @@ enum Shape {
     L,
     J,
     O,
-    I
+    I,
 }
 
 struct Mino {
@@ -227,7 +223,7 @@ impl Mino {
             x: x,
             y: y,
             rot: rot,
-            shape: shape
+            shape: shape,
         }
     }
 
@@ -237,68 +233,84 @@ impl Mino {
                 Block::new(-1, 0, C_TMINO),
                 Block::new(0, 0, C_TMINO),
                 Block::new(0, -1, C_TMINO),
-                Block::new(1, 0, C_TMINO)
+                Block::new(1, 0, C_TMINO),
             ],
             Shape::S => vec![
                 Block::new(-1, -1, C_SMINO),
                 Block::new(0, -1, C_SMINO),
                 Block::new(0, 0, C_SMINO),
-                Block::new(1, 0, C_SMINO)
+                Block::new(1, 0, C_SMINO),
             ],
             Shape::Z => vec![
                 Block::new(-1, 0, C_ZMINO),
                 Block::new(0, 0, C_ZMINO),
                 Block::new(0, -1, C_ZMINO),
-                Block::new(1, -1, C_ZMINO)
+                Block::new(1, -1, C_ZMINO),
             ],
             Shape::J => vec![
                 Block::new(-1, -2, C_JMINO),
                 Block::new(-1, -1, C_JMINO),
                 Block::new(-1, 0, C_JMINO),
-                Block::new(0, 0, C_JMINO)
+                Block::new(0, 0, C_JMINO),
             ],
             Shape::L => vec![
                 Block::new(0, -2, C_LMINO),
                 Block::new(0, -1, C_LMINO),
                 Block::new(-1, 0, C_LMINO),
-                Block::new(0, 0, C_LMINO)
+                Block::new(0, 0, C_LMINO),
             ],
             Shape::O => vec![
                 Block::new(0, 0, C_OMINO),
                 Block::new(-1, 0, C_OMINO),
                 Block::new(0, -1, C_OMINO),
-                Block::new(-1, -1, C_OMINO)
+                Block::new(-1, -1, C_OMINO),
             ],
             Shape::I => vec![
                 Block::new(-2, 0, C_IMINO),
                 Block::new(-1, 0, C_IMINO),
                 Block::new(0, 0, C_IMINO),
-                Block::new(1, 0, C_IMINO)
+                Block::new(1, 0, C_IMINO),
             ],
         };
         let rot = (self.rot + 10000) % 4;
-        let ret: Vec<Block> = blocks.iter().map(|b| b.rotate(rot)).map(|b| b.shift(self.x, self.y)).collect();
-        return ret
+        let ret: Vec<Block> = blocks
+            .iter()
+            .map(|b| b.rotate(rot))
+            .map(|b| b.shift(self.x, self.y))
+            .collect();
+        return ret;
     }
 
     fn can_move_left(&self, board: &Board) -> bool {
         let mino: Mino = Mino::new(self.x - 1, self.y, self.rot, self.shape);
-        return mino.get_blocks().iter().all(|b| board.is_blank_at(b.x, b.y))
+        return mino
+            .get_blocks()
+            .iter()
+            .all(|b| board.is_blank_at(b.x, b.y));
     }
 
     fn can_move_right(&self, board: &Board) -> bool {
         let mino: Mino = Mino::new(self.x + 1, self.y, self.rot, self.shape);
-        return mino.get_blocks().iter().all(|b| board.is_blank_at(b.x, b.y))
+        return mino
+            .get_blocks()
+            .iter()
+            .all(|b| board.is_blank_at(b.x, b.y));
     }
 
     fn can_move_down(&self, board: &Board) -> bool {
         let mino: Mino = Mino::new(self.x, self.y - 1, self.rot, self.shape);
-        return mino.get_blocks().iter().all(|b| board.is_blank_at(b.x, b.y))
+        return mino
+            .get_blocks()
+            .iter()
+            .all(|b| board.is_blank_at(b.x, b.y));
     }
 
     fn can_rotate(&self, board: &Board) -> bool {
         let mino: Mino = Mino::new(self.x, self.y, self.rot + 1, self.shape);
-        return mino.get_blocks().iter().all(|b| board.is_blank_at(b.x, b.y))
+        return mino
+            .get_blocks()
+            .iter()
+            .all(|b| board.is_blank_at(b.x, b.y));
     }
 
     fn move_left_if_possible(&mut self, board: &Board) {
@@ -338,28 +350,26 @@ impl Mino {
 }
 
 struct Board {
-    blocks: [[i32; BOARD_WIDTH]; BOARD_HEIGHT]
+    blocks: [[i32; BOARD_WIDTH]; BOARD_HEIGHT],
 }
 
 impl Board {
     fn new() -> Self {
         let blocks = [[0; BOARD_WIDTH]; BOARD_HEIGHT];
-        Board {
-            blocks: blocks
-        }
+        Board { blocks: blocks }
     }
 
     fn is_blank_at(&self, x: i32, y: i32) -> bool {
         if x < 0 || x > BOARD_WIDTH as i32 - 1 {
-            return false
+            return false;
         }
         if y < 0 || y > BOARD_HEIGHT as i32 - 1 {
-            return false
+            return false;
         }
         if self.blocks[y as usize][x as usize] > 0 {
-            return false
+            return false;
         }
-        return true
+        return true;
     }
 
     fn get_blocks(&self) -> Vec<Block> {
@@ -367,17 +377,13 @@ impl Board {
         for x in (0..BOARD_WIDTH).into_iter() {
             for y in (0..BOARD_HEIGHT_PLAYABLE).into_iter() {
                 match self.blocks[y][x] {
-                    0 => {
-                        blocks.push(Block::new(x as i32, y as i32, T_WHITE))
-                    }
-                    1 => {
-                        blocks.push(Block::new(x as i32, y as i32, C_LOCATED))
-                    }
-                    _ => ()
+                    0 => blocks.push(Block::new(x as i32, y as i32, T_WHITE)),
+                    1 => blocks.push(Block::new(x as i32, y as i32, C_LOCATED)),
+                    _ => (),
                 }
             }
         }
-        return blocks
+        return blocks;
     }
 
     fn put_mino(&mut self, mino: &Mino) {
@@ -404,7 +410,7 @@ impl Board {
                 self.blocks[BOARD_HEIGHT - 1] = [0; BOARD_WIDTH];
             }
         }
-        return delete_count
+        return delete_count;
     }
 
     fn draw(&self, draw: &Draw) {

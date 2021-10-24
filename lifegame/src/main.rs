@@ -1,6 +1,6 @@
 use nannou;
 
-use lifegame::{model, event, update, view};
+use lifegame::{event, model, update, view};
 
 fn main() {
     nannou::app(model)

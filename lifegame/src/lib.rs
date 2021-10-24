@@ -9,19 +9,18 @@ const CELL_SIZE: f32 = 12.0;
 
 pub struct Model {
     cells: Cells,
-    fc: i32
+    fc: i32,
 }
 
 pub fn model(_app: &App) -> Model {
     let cells = Cells::new();
     Model {
         cells: cells,
-        fc: 0
+        fc: 0,
     }
 }
 
-pub fn event(_app: &App, _model: &mut Model, _event: Event) {
-}
+pub fn event(_app: &App, _model: &mut Model, _event: Event) {}
 
 pub fn update(_app: &App, model: &mut Model, _update: Update) {
     model.cells.next_gen();
@@ -38,7 +37,7 @@ pub fn view(app: &App, model: &Model, frame: Frame) {
 struct Cells {
     r_mat: [[i32; WIDTH]; HEIGHT],
     g_mat: [[i32; WIDTH]; HEIGHT],
-    b_mat: [[i32; WIDTH]; HEIGHT]
+    b_mat: [[i32; WIDTH]; HEIGHT],
 }
 
 impl Cells {
@@ -77,7 +76,7 @@ impl Cells {
                     244.0 * (1 - r) as f32 / 255.0,
                     244.0 * (1 - g) as f32 / 255.0,
                     244.0 * (1 - b) as f32 / 255.0,
-                    1.0
+                    1.0,
                 );
                 draw.rect()
                     .x_y(loc_x, loc_y)
@@ -90,20 +89,20 @@ impl Cells {
 
     fn next_cell_at(x: usize, y: usize, cell_mat: &[[i32; WIDTH]; HEIGHT]) -> i32 {
         let env_sum = cell_mat[(y + HEIGHT - 1) % HEIGHT][(x + WIDTH - 1) % WIDTH]
-                    + cell_mat[(y + HEIGHT - 1) % HEIGHT][x]
-                    + cell_mat[(y + HEIGHT - 1) % HEIGHT][(x + 1) % WIDTH]
-                    + cell_mat[y][(x + WIDTH - 1) % WIDTH]
-                    + cell_mat[y][(x + 1) % WIDTH]
-                    + cell_mat[(y + 1) % HEIGHT][(x + WIDTH - 1) % WIDTH]
-                    + cell_mat[(y + 1) % HEIGHT][x]
-                    + cell_mat[(y + 1) % HEIGHT][(x  + 1) % WIDTH];
+            + cell_mat[(y + HEIGHT - 1) % HEIGHT][x]
+            + cell_mat[(y + HEIGHT - 1) % HEIGHT][(x + 1) % WIDTH]
+            + cell_mat[y][(x + WIDTH - 1) % WIDTH]
+            + cell_mat[y][(x + 1) % WIDTH]
+            + cell_mat[(y + 1) % HEIGHT][(x + WIDTH - 1) % WIDTH]
+            + cell_mat[(y + 1) % HEIGHT][x]
+            + cell_mat[(y + 1) % HEIGHT][(x + 1) % WIDTH];
         let next_cell = match env_sum {
             0 | 1 => 0,
             2 => cell_mat[y][x],
             3 => 1,
-            _other => 0
+            _other => 0,
         };
-        return next_cell
+        return next_cell;
     }
 
     fn next_gen(&mut self) {
