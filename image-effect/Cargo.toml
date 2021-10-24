@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 nannou = "0.15"
+ndarray = "0.15.0"
