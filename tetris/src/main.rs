@@ -1,7 +1,7 @@
 use nannou;
 
-use tetris::model;
 use tetris::event;
+use tetris::model;
 use tetris::update;
 use tetris::view;
 

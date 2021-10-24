@@ -2,12 +2,12 @@ use nannou::prelude::*;
 
 #[derive(Clone)]
 struct Line {
-    points: Vec<Point2>
+    points: Vec<Point2>,
 }
 
 impl Line {
     fn new() -> Self {
-        Line {points: vec![]}
+        Line { points: vec![] }
     }
 
     fn is_empty(&self) -> bool {
@@ -18,7 +18,7 @@ impl Line {
 struct Model {
     touch: bool,
     lines: Vec<Line>,
-    line: Line
+    line: Line,
 }
 
 fn main() {
@@ -31,17 +31,20 @@ fn main() {
 }
 
 fn model(_app: &App) -> Model {
-    Model {touch: false, lines: vec![], line: Line::new()}
+    Model {
+        touch: false,
+        lines: vec![],
+        line: Line::new(),
+    }
 }
 
-fn update(_app: &App, _model: &mut Model, _update: Update) {
-}
+fn update(_app: &App, _model: &mut Model, _update: Update) {}
 
 fn event(_app: &App, model: &mut Model, event: Event) {
     match event {
         Event::WindowEvent {
             id: _,
-            simple: some_we
+            simple: some_we,
         } => {
             if let Some(we) = some_we {
                 match we {
@@ -91,16 +94,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
 }
 
 fn draw_line(draw: &Draw, line: &Line) {
-    let points = line.points.iter().map(|pp| {
-        (pt2(pp.x, pp.y), RED)
-    });
-    let rev = line.points.iter().map(|pp| {
-        (pt2(-pp.x, -pp.y), BLUE)
-    });
-    draw.polyline()
-        .weight(2.0)
-        .points_colored(points);
-    draw.polyline()
-        .weight(2.0)
-        .points_colored(rev);
+    let points = line.points.iter().map(|pp| (pt2(pp.x, pp.y), RED));
+    let rev = line.points.iter().map(|pp| (pt2(-pp.x, -pp.y), BLUE));
+    draw.polyline().weight(2.0).points_colored(points);
+    draw.polyline().weight(2.0).points_colored(rev);
 }

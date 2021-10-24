@@ -8,7 +8,7 @@ struct Face {
 }
 
 struct Model {
-    faces: Vec<Face>
+    faces: Vec<Face>,
 }
 
 fn main() {
@@ -21,17 +21,16 @@ fn main() {
 }
 
 fn model(_app: &App) -> Model {
-    Model {faces: vec![]}
+    Model { faces: vec![] }
 }
 
-fn update(_app: &App, _model: &mut Model, _update: Update) {
-}
+fn update(_app: &App, _model: &mut Model, _update: Update) {}
 
 fn event(app: &App, model: &mut Model, event: Event) {
     match event {
         Event::WindowEvent {
             id: _,
-            simple: some_we
+            simple: some_we,
         } => {
             if let Some(we) = some_we {
                 match we {
@@ -62,7 +61,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
 fn new_face(app: &App, x: f32, y: f32) -> Face {
     let t = app.time;
     let size = t.sin() * 110.0 + 140.0;
-    return Face {size, x, y}
+    return Face { size, x, y };
 }
 
 fn draw_face(draw: &Draw, size: f32, x: f32, y: f32) {
@@ -89,19 +88,21 @@ fn draw_face(draw: &Draw, size: f32, x: f32, y: f32) {
         .color(BLACK);
 }
 
-fn ellipse_with_stroke(draw: &Draw, x: f32, y:f32, w:f32, h:f32, color: Rgb8, stroke_color: Rgb8) {
+fn ellipse_with_stroke(
+    draw: &Draw,
+    x: f32,
+    y: f32,
+    w: f32,
+    h: f32,
+    color: Rgb8,
+    stroke_color: Rgb8,
+) {
     let points = (0..=360).map(|i| {
         let radian = deg_to_rad(i as f32);
         let xpos = radian.sin() * (w / 2.0) + x;
         let ypos = radian.cos() * (h / 2.0) + y;
         (pt2(xpos, ypos), stroke_color)
     });
-    draw.polyline()
-        .weight(3.0)
-        .points_colored(points);
-    draw.ellipse()
-        .x_y(x, y)
-        .w(w)
-        .h(h)
-        .color(color);
+    draw.polyline().weight(3.0).points_colored(points);
+    draw.ellipse().x_y(x, y).w(w).h(h).color(color);
 }
